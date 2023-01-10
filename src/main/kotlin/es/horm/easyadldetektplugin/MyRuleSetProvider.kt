@@ -1,4 +1,4 @@
-package com.github.tommyten.easyadldetektplugin
+package es.horm.easyadldetektplugin
 
 import io.gitlab.arturbosch.detekt.api.Config
 import io.gitlab.arturbosch.detekt.api.RuleSet

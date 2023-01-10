@@ -3,6 +3,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     kotlin("jvm") version "1.7.20"
     `maven-publish`
+    antlr
 }
 
 group = "com.github.tommyten.easyadldetektplugin"
@@ -13,7 +14,10 @@ repositories {
 }
 
 dependencies {
-    compileOnly("io.gitlab.arturbosch.detekt:detekt-api:1.22.0")
+    api("io.gitlab.arturbosch.detekt:detekt-api:1.22.0")
+
+    implementation("com.yuvalshavit:antlr-denter:1.1")
+    antlr("org.antlr:antlr4:4.11.1")
 
     testImplementation("io.gitlab.arturbosch.detekt:detekt-test:1.22.0")
     testImplementation("io.kotest:kotest-assertions-core:5.5.4")
