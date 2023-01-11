@@ -3,34 +3,37 @@ package es.horm.easyadldetektplugin.interpreter
 import es.horm.easyadldetektplugin.lang.EasyAdlBaseVisitor
 import es.horm.easyadldetektplugin.lang.EasyAdlLexer
 import es.horm.easyadldetektplugin.lang.EasyAdlParser
+import es.horm.easyadldetektplugin.lang.EasyAdlParser.ArchitectureDescriptionContext
+import es.horm.easyadldetektplugin.lang.EasyAdlParser.ComponentDefinitionContext
+import es.horm.easyadldetektplugin.lang.EasyAdlParser.OperationContext
+import es.horm.easyadldetektplugin.lang.EasyAdlParser.SystemDefinitionContext
 import es.horm.easyadldetektplugin.model.ArchitectureDescription
 import es.horm.easyadldetektplugin.model.ArchitectureFragment
-import es.horm.easyadldetektplugin.model.Component
-import es.horm.easyadldetektplugin.model.Operation
+import es.horm.easyadldetektplugin.model.Argument
+import es.horm.easyadldetektplugin.model.ComponentArgument
+import es.horm.easyadldetektplugin.model.EasyAdlComponent
+import es.horm.easyadldetektplugin.model.EasyAdlOperation
+import es.horm.easyadldetektplugin.model.EasyAdlSystem
+import es.horm.easyadldetektplugin.model.IdentifyingEasyAdlOperation
 import es.horm.easyadldetektplugin.model.OperationFactory
-import es.horm.easyadldetektplugin.model.System
+import es.horm.easyadldetektplugin.model.StringArgument
 import org.antlr.v4.runtime.CharStreams
 import org.antlr.v4.runtime.CommonTokenStream
 import java.util.*
+import kotlin.NoSuchElementException
 
-class EasyAdlInterpreter {
+fun interpretArchitectureDescription(
+    architectureDescriptionText: String
+): ArchitectureDescription {
+    val lexer = EasyAdlLexer(CharStreams.fromString(architectureDescriptionText))
+    val parser = EasyAdlParser(CommonTokenStream(lexer))
 
-    fun interpretArchitectureDescription(architectureDescriptionText: String): ArchitectureDescription {
-        val lexer = EasyAdlLexer(CharStreams.fromString(architectureDescriptionText))
-        val parser = EasyAdlParser(CommonTokenStream(lexer))
-
-        val arch = parser.architectureDescription().accept(ArchitectureDescriptionVisitor())
-
-        println(arch)
-
-        return arch
-    }
-
+    return parser.architectureDescription().accept(ArchitectureDescriptionVisitor())
 }
 
 class ArchitectureDescriptionVisitor : EasyAdlBaseVisitor<ArchitectureDescription>() {
 
-    override fun visitArchitectureDescription(ctx: EasyAdlParser.ArchitectureDescriptionContext): ArchitectureDescription {
+    override fun visitArchitectureDescription(ctx: ArchitectureDescriptionContext): ArchitectureDescription {
         val fragmentsInArchitecture = mutableListOf<ArchitectureFragment>()
         fragmentsInArchitecture.addAll(ctx.componentDefinition().map { it.accept(ComponentVisitor()) })
         fragmentsInArchitecture.addAll(ctx.systemDefinition().map { it.accept(SystemVisitor()) })
@@ -38,38 +41,57 @@ class ArchitectureDescriptionVisitor : EasyAdlBaseVisitor<ArchitectureDescriptio
     }
 }
 
-class SystemVisitor : EasyAdlBaseVisitor<System>() {
-    override fun visitSystemDefinition(ctx: EasyAdlParser.SystemDefinitionContext): System {
+class SystemVisitor : EasyAdlBaseVisitor<EasyAdlSystem>() {
+    override fun visitSystemDefinition(ctx: SystemDefinitionContext): EasyAdlSystem {
         val systemIdentifier = ctx.system().ID().text
         val components = ctx.componentDefinition().map { it.accept(ComponentVisitor()) }
-        return System(systemIdentifier, components)
+        return EasyAdlSystem(systemIdentifier, components)
     }
 }
 
-class ComponentVisitor : EasyAdlBaseVisitor<Component>() {
-    override fun visitComponentDefinition(ctx: EasyAdlParser.ComponentDefinitionContext): Component {
+class ComponentVisitor : EasyAdlBaseVisitor<EasyAdlComponent>() {
+    override fun visitComponentDefinition(ctx: ComponentDefinitionContext): EasyAdlComponent {
         val componentIdentifier = ctx.component().ID().text
-        val operators = ctx.operation().map { it.accept(OperatorVisitor()) }
-        return Component(componentIdentifier, operators)
+        val operators = ctx.operation().map { it.accept(OperationVisitor()) }
+        return EasyAdlComponent(componentIdentifier, operators)
     }
 }
 
-class OperatorVisitor : EasyAdlBaseVisitor<Operation>() {
+class OperationVisitor : EasyAdlBaseVisitor<EasyAdlOperation>() {
 
     private val loadedOperatorFactories = ServiceLoader.load(OperationFactory::class.java)
 
-    override fun visitOperation(ctx: EasyAdlParser.OperationContext): Operation {
-        val arguments = ctx.argument().map { it.text.removeSurrounding("\"") }
+    override fun visitOperation(ctx: OperationContext): EasyAdlOperation {
+        val argumentList = mutableListOf<Argument>()
+        argumentList.addAll(
+            ctx.argument()
+                .mapNotNull { it.ARGUMENT()?.text?.removeSurrounding("\"") }
+                .map { StringArgument(it) }
+        )
+        argumentList.addAll(
+            ctx.argument()
+                .mapNotNull { it.component()?.ID()?.text }
+                .map { ComponentArgument(it) }
+        )
         val operator = ctx.operator().ID().joinToString(" ") { it.text }
 
         val suitableFactory = try {
-             loadedOperatorFactories.single { it.canCreateOperation(operator) }
+            loadedOperatorFactories.single { it.canCreateOperation(operator) }
         } catch (noElement: NoSuchElementException) {
             error("No Operator Factory was loaded which provides a definition for operator \"$operator\"")
         } catch (tooMany: IllegalArgumentException) {
             error("The operator \"$operator\" was found in multiple operator factories")
         }
 
-        return suitableFactory.createOperation(operator, arguments)
+        val operation = suitableFactory.createOperation(operator, argumentList)
+        if (operation is IdentifyingEasyAdlOperation) {
+            require(argumentList.all { it !is ComponentArgument }) {
+                "Identifying Operations are currently not supported with component Arguments."
+            }
+        }
+
+        return operation
     }
 }
+
+

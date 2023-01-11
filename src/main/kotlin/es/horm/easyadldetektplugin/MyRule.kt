@@ -1,7 +1,10 @@
 package es.horm.easyadldetektplugin
 
-import es.horm.easyadldetektplugin.interpreter.EasyAdlInterpreter
-import es.horm.easyadldetektplugin.model.Component
+import es.horm.easyadldetektplugin.interpreter.interpretArchitectureDescription
+import es.horm.easyadldetektplugin.model.ArchitectureDescription
+import es.horm.easyadldetektplugin.model.EasyAdlComponent
+import es.horm.easyadldetektplugin.model.EasyAdlOperation
+import es.horm.easyadldetektplugin.model.ExecutionScope
 import io.gitlab.arturbosch.detekt.api.CodeSmell
 import io.gitlab.arturbosch.detekt.api.Config
 import io.gitlab.arturbosch.detekt.api.Debt
@@ -9,9 +12,17 @@ import io.gitlab.arturbosch.detekt.api.Entity
 import io.gitlab.arturbosch.detekt.api.Issue
 import io.gitlab.arturbosch.detekt.api.Rule
 import io.gitlab.arturbosch.detekt.api.Severity
+import io.gitlab.arturbosch.detekt.api.internal.RequiresTypeResolution
+import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.psi.KtElement
+import org.jetbrains.kotlin.psi.KtNamedDeclaration
 
-class MyRule(config: Config) : Rule(config) {
+@RequiresTypeResolution
+class MyRule(
+    config: Config,
+    val architectureDescription: String
+) : Rule(config) {
+
     override val issue = Issue(
         javaClass.simpleName,
         Severity.CodeSmell,
@@ -21,32 +32,18 @@ class MyRule(config: Config) : Rule(config) {
 
     override fun visitKtElement(element: KtElement) {
         super.visitKtElement(element)
-        println("visitNamedDeclaration")
-        val input = """
-component NotInSystem:
-  has suffix "Foo"
-  is class
-  is not inner class
-  must have inner class
-""".trimIndent()
-        val architectureDescription = EasyAdlInterpreter().interpretArchitectureDescription(input)
+        val architectureDescription = interpretArchitectureDescription(architectureDescription)
+        val executionScope = ExecutionScope(bindingContext, architectureDescription)
 
-        val components = architectureDescription.architectureFragments.filterIsInstance<Component>()
-        val identified = components.any { it.canComponentBeIdentified(element) }
-        if(identified) {
-            val doesComply = components.all { it.doesComponentComply(element) }
-            if(!doesComply) {
+        val easyAdlComponents = architectureDescription.architectureFragments.filterIsInstance<EasyAdlComponent>()
+        val identified = easyAdlComponents.filter { it.canComponentBeIdentified(element, executionScope) }
+        for (component in identified) {
+            val doesComply = component.doesComponentComply(element, executionScope)
+            if (!doesComply) {
                 report(CodeSmell(issue, Entity.from(element), "Element does not comply to architecture description"))
             }
             println("${element.text} could be identified does it comply? $doesComply")
         }
     }
 
-    /*override fun visitClass(klass: KtClass) {
-        super.visitClass(klass)
-
-        if (klass.isInner()) {
-            report(CodeSmell(issue, Entity.atName(klass), "Custom message"))
-        }
-    }*/
 }

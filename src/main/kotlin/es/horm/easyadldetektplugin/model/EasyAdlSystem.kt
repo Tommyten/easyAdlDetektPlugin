@@ -1,6 +1,6 @@
 package es.horm.easyadldetektplugin.model
 
-data class System(
+data class EasyAdlSystem(
     val name: String,
-    val components: List<Component>
+    val easyAdlComponents: List<EasyAdlComponent>
 ) : ArchitectureFragment

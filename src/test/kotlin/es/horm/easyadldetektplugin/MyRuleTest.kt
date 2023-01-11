@@ -12,33 +12,87 @@ internal class MyRuleTest(private val env: KotlinCoreEnvironment) {
 
     @Test
     fun `reports inner classes`() {
+        val architectureDescription = """
+component Test:
+  has suffix "Test"
+  may not reference component NotInSystem
+  
+component FunTest:
+  has suffix "Fun"
+            
+component NotInSystem:
+  has suffix "Foo"
+  is class
+  is not inner class
+  must have inner class
+  must reference component Test
+""".trimIndent()
+
         val code = """
+        package es.horm.test
+
+        @Composable
+        fun blaFun() {
+        
+        }
+
         class AFoo {
+            val bla = BlaTest()
+            val test = List()
             inner class BFoo {
                 
             }
         }
 
         class TestFoo {
-        
+            fun asdf(){
+            blaFun()}
         }
 
-        fun blaFoo() {
-        
+        class BlaTest {
+            val aFoo = AFoo()
         }
+
+        annotation class Composable
         """
-        val findings = MyRule(Config.empty).compileAndLintWithContext(env, code)
+        val findings = MyRule(Config.empty, architectureDescription).compileAndLintWithContext(env, code)
         findings shouldHaveSize 3
     }
 
     @Test
-    fun `doesn't report inner classes`() {
+    fun `mvvm example successful`() {
+        val architectureDescription = """
+            component ViewModel:
+              has suffix "ViewModel"
+              must reference component Repository
+              
+            component Repository:
+              has suffix "Repository"
+
+            component UI:
+              has Suffix "Screen"
+              is annotated with "Composable"
+              must reference component ViewModel
+              may not reference component Repository
+        """.trimIndent()
+
         val code = """
-        class A {
-          class B
-        }
+class TestRepository {
+
+}
+
+class TestViewModel {
+    val repository = TestRepository()
+}
+
+@Composable
+fun TestScreen() {
+    val viewModel = TestViewModel()
+}
+
+annotation class Composable
         """
-        val findings = MyRule(Config.empty).compileAndLintWithContext(env, code)
+        val findings = MyRule(Config.empty, architectureDescription).compileAndLintWithContext(env, code)
         findings shouldHaveSize 0
     }
 }
