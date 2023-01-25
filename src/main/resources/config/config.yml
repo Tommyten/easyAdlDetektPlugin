@@ -1,3 +1,4 @@
-MyRuleSet:
-  MyRule:
+EasyAdlRuleSet:
+  EasyAdlComplianceRule:
+    architectureDescriptionPath: ''
     active: true

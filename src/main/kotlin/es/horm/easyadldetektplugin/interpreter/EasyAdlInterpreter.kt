@@ -59,7 +59,7 @@ class ComponentVisitor : EasyAdlBaseVisitor<EasyAdlComponent>() {
 
 class OperationVisitor : EasyAdlBaseVisitor<EasyAdlOperation>() {
 
-    private val loadedOperatorFactories = ServiceLoader.load(OperationFactory::class.java)
+    private val loadedOperatorFactories = ServiceLoader.load(OperationFactory::class.java, OperationFactory::class.java.classLoader)
 
     override fun visitOperation(ctx: OperationContext): EasyAdlOperation {
         val argumentList = mutableListOf<Argument>()

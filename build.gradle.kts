@@ -4,18 +4,22 @@ plugins {
     kotlin("jvm") version "1.7.20"
     `maven-publish`
     antlr
+    id("io.gitlab.arturbosch.detekt").version("1.22.0")
+    id("java-gradle-plugin")
 }
 
-group = "com.github.tommyten.easyadldetektplugin"
-version = "1.0-SNAPSHOT"
+group = "es.horm.easyadldetektplugin"
+version = "0.0.1"
 
 repositories {
     mavenCentral()
+    maven { url = uri("https://maven.pkg.jetbrains.space/public/p/kotlinx-html/maven") }
 }
 
 dependencies {
     api("io.gitlab.arturbosch.detekt:detekt-api:1.22.0")
 
+    implementation("org.jetbrains.kotlinx:kotlinx-html-jvm:0.8.0")
     implementation("com.yuvalshavit:antlr-denter:1.1")
     antlr("org.antlr:antlr4:4.11.1")
 
@@ -38,6 +42,21 @@ publishing {
     publications {
         create<MavenPublication>("mavenJava") {
             from(components["java"])
+        }
+    }
+}
+
+detekt {
+    toolVersion = "1.22.0"
+    config = files("config/detekt/detekt.yml")
+    buildUponDefaultConfig = true
+}
+
+gradlePlugin {
+    plugins {
+        create("easyAdlPlugin") {
+            id = "es.horm.easyadldetektplugin.gradleplugin"
+            implementationClass = "es.horm.easyadldetektplugin.gradleplugin.EasyAdlPlugin"
         }
     }
 }

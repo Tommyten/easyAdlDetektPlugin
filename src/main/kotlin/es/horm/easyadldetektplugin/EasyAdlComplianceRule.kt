@@ -1,11 +1,8 @@
 package es.horm.easyadldetektplugin
 
-import es.horm.easyadldetektplugin.interpreter.interpretArchitectureDescription
+import es.horm.easyadldetektplugin.config.EasyAdlArchitectureHolder
 import es.horm.easyadldetektplugin.model.ArchitectureDescription
-import es.horm.easyadldetektplugin.model.EasyAdlComponent
-import es.horm.easyadldetektplugin.model.EasyAdlOperation
 import es.horm.easyadldetektplugin.model.ExecutionScope
-import io.gitlab.arturbosch.detekt.api.CodeSmell
 import io.gitlab.arturbosch.detekt.api.Config
 import io.gitlab.arturbosch.detekt.api.Debt
 import io.gitlab.arturbosch.detekt.api.Entity
@@ -13,37 +10,37 @@ import io.gitlab.arturbosch.detekt.api.Issue
 import io.gitlab.arturbosch.detekt.api.Rule
 import io.gitlab.arturbosch.detekt.api.Severity
 import io.gitlab.arturbosch.detekt.api.internal.RequiresTypeResolution
-import org.jetbrains.kotlin.name.FqName
+import org.jetbrains.kotlin.psi.KtCallExpression
 import org.jetbrains.kotlin.psi.KtElement
-import org.jetbrains.kotlin.psi.KtNamedDeclaration
 
 @RequiresTypeResolution
-class MyRule(
-    config: Config,
-    val architectureDescription: String
+class EasyAdlComplianceRule(
+    config: Config
 ) : Rule(config) {
 
     override val issue = Issue(
         javaClass.simpleName,
-        Severity.CodeSmell,
-        "Custom Rule",
-        Debt.FIVE_MINS,
+        Severity.Maintainability,
+        "Detekt Compliance Rule",
+        Debt.TWENTY_MINS,
     )
 
+    var architectureDescription: ArchitectureDescription = EasyAdlArchitectureHolder.architectureDescription ?: ArchitectureDescription(listOf())
+
     override fun visitKtElement(element: KtElement) {
-        super.visitKtElement(element)
-        val architectureDescription = interpretArchitectureDescription(architectureDescription)
         val executionScope = ExecutionScope(bindingContext, architectureDescription)
 
-        val easyAdlComponents = architectureDescription.architectureFragments.filterIsInstance<EasyAdlComponent>()
+        val easyAdlComponents = architectureDescription.getAllComponents()
         val identified = easyAdlComponents.filter { it.canComponentBeIdentified(element, executionScope) }
         for (component in identified) {
+            println("Identified a component!")
             val doesComply = component.doesComponentComply(element, executionScope)
             if (!doesComply) {
-                report(CodeSmell(issue, Entity.from(element), "Element does not comply to architecture description"))
+                println("The component does not comply!")
+                report(ArchitectureError(issue, Entity.from(element), "Element does not comply to architecture description"))
             }
-            println("${element.text} could be identified does it comply? $doesComply")
         }
-    }
 
+        super.visitKtElement(element)
+    }
 }

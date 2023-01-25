@@ -1,0 +1,12 @@
+component ViewModel:
+  has suffix "ViewModel"
+  must reference component Repository
+
+component Repository:
+  has suffix "Repository"
+
+component UI:
+  has Suffix "Screen"
+  is annotated with "Composable"
+  must reference component ViewModel
+  may not reference component Repository
