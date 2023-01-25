@@ -19,7 +19,7 @@ repositories {
 dependencies {
     api("io.gitlab.arturbosch.detekt:detekt-api:1.22.0")
 
-    implementation("org.jetbrains.kotlinx:kotlinx-html-jvm:0.8.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-html-jvm:0.8.1")
     implementation("com.yuvalshavit:antlr-denter:1.1")
     antlr("org.antlr:antlr4:4.11.1")
 
