@@ -1,9 +1,12 @@
-package es.horm.easyadldetektplugin
+package es.horm.easyadldetektplugin.detekt
 
 import io.gitlab.arturbosch.detekt.api.CodeSmell
 import io.gitlab.arturbosch.detekt.api.Entity
 import io.gitlab.arturbosch.detekt.api.Issue
 
 class ArchitectureError(
-    issue: Issue, entity: Entity, message: String
+    val componentName: String,
+    issue: Issue,
+    entity: Entity,
+    message: String
 ) : CodeSmell(issue, entity, message)

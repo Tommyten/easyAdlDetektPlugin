@@ -1,6 +1,6 @@
 package es.horm.easyadldetektplugin
 
-import es.horm.easyadldetektplugin.processor.ArchComponentProcessor
+import es.horm.easyadldetektplugin.detekt.processor.ArchComponentProcessor
 import io.github.detekt.test.utils.compileContentForTest
 import io.gitlab.arturbosch.detekt.api.Detektion
 import io.gitlab.arturbosch.detekt.api.Finding

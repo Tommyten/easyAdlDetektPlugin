@@ -24,7 +24,7 @@ import com.yuvalshavit.antlr4.DenterHelper;
 architectureDescription: (systemDefinition | componentDefinition)+ EOF;
 systemDefinition: system ':' INDENT (componentDefinition NL?)+ DEDENT;
 componentDefinition : component ':' INDENT (operation NL)+ DEDENT;
-operation: operator (argument)*;
+operation: operator (argument | operator)*;
 
 operator: ID+;
 system : SYSTEM ID;

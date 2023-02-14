@@ -1,4 +1,4 @@
-package es.horm.easyadldetektplugin.operations.rule
+package es.horm.easyadldetektplugin.stdlib.operations.rule
 
 import es.horm.easyadldetektplugin.model.ExecutionScope
 import es.horm.easyadldetektplugin.model.RuleEasyAdlOperation
@@ -7,6 +7,8 @@ import org.jetbrains.kotlin.psi.KtElement
 import org.jetbrains.kotlin.psi.psiUtil.getChildrenOfType
 
 class MustHaveInnerClassOperation : RuleEasyAdlOperation {
+
+    override val errorMessage = "This component does not declare an inner class."
 
     companion object {
 

@@ -1,4 +1,4 @@
-package es.horm.easyadldetektplugin.operations.rule
+package es.horm.easyadldetektplugin.stdlib.operations.rule
 
 import es.horm.easyadldetektplugin.model.ExecutionScope
 import es.horm.easyadldetektplugin.model.RuleEasyAdlOperation
@@ -9,6 +9,8 @@ import org.jetbrains.kotlin.psi.psiUtil.collectDescendantsOfType
 import org.jetbrains.kotlin.psi.psiUtil.isPublic
 
 class MustDeclarePublicMethodOperation(private val methodName: StringArgument) : RuleEasyAdlOperation {
+
+    override val errorMessage = "This component does not declare a public method called ${methodName.value}."
 
     companion object {
 

@@ -1,4 +1,4 @@
-package es.horm.easyadldetektplugin.operations.identifying
+package es.horm.easyadldetektplugin.stdlib.operations.identifying
 
 import es.horm.easyadldetektplugin.model.ExecutionScope
 import es.horm.easyadldetektplugin.model.IdentifyingEasyAdlOperation

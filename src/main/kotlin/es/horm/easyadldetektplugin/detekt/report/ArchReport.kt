@@ -1,49 +1,40 @@
-package es.horm.easyadldetektplugin.report
+package es.horm.easyadldetektplugin.detekt.report
 
-import es.horm.easyadldetektplugin.ARCHITECTURE_DESCRIPTION_PATH_CONFIG_KEY
-import es.horm.easyadldetektplugin.ArchitectureError
-import es.horm.easyadldetektplugin.config.EasyAdlArchitectureHolder
-import es.horm.easyadldetektplugin.config.EasyAdlArchitectureReader
-import es.horm.easyadldetektplugin.interpreter.interpretArchitectureDescription
+import es.horm.easyadldetektplugin.detekt.ArchitectureError
+import es.horm.easyadldetektplugin.detekt.config.EasyAdlArchitectureHolder
 import es.horm.easyadldetektplugin.mermaid.architectureDescriptionToMermaid
 import es.horm.easyadldetektplugin.model.ArchitectureDescription
 import es.horm.easyadldetektplugin.model.EasyAdlComponent
-import es.horm.easyadldetektplugin.processor.ArchComponentProcessor
-import io.gitlab.arturbosch.detekt.api.Config
+import es.horm.easyadldetektplugin.detekt.processor.ArchComponentProcessor
 import io.gitlab.arturbosch.detekt.api.Detektion
 import io.gitlab.arturbosch.detekt.api.Entity
-import io.gitlab.arturbosch.detekt.api.Location
 import io.gitlab.arturbosch.detekt.api.OutputReport
 import io.gitlab.arturbosch.detekt.api.SourceLocation
 import io.gitlab.arturbosch.detekt.api.TextLocation
 import kotlinx.html.FlowContent
-import kotlinx.html.a
 import kotlinx.html.code
 import kotlinx.html.div
 import kotlinx.html.h3
-import kotlinx.html.h4
 import kotlinx.html.p
 import kotlinx.html.pre
 import kotlinx.html.span
 import kotlinx.html.stream.createHTML
-import org.jetbrains.kotlin.psi.KtElement
-import java.io.File
-import java.nio.file.Paths
 import kotlin.math.max
 import kotlin.math.min
 
 class ArchReport : OutputReport() {
 
-    private var architectureDescription: ArchitectureDescription = EasyAdlArchitectureHolder.architectureDescription ?: throw IllegalStateException()
+    private var architectureDescription: ArchitectureDescription =
+        EasyAdlArchitectureHolder.architectureDescription ?: throw IllegalStateException()
     override val ending: String = ".arch.html"
 
     override fun render(detektion: Detektion): String {
-        println("IN render")
         val mermaid = architectureDescriptionToMermaid(architectureDescription)
 
         val identifiedComponents = detektion.getData(ArchComponentProcessor.identifiedComponentsKey) ?: mapOf()
 
-        val architectureFindings = detektion.findings["EasyAdlRuleSet"]?.filterIsInstance<ArchitectureError>() ?: listOf()
+        val architectureFindings: List<ArchitectureError> =
+            detektion.findings["EasyAdlRuleSet"]?.filterIsInstance<ArchitectureError>() ?: listOf()
 
         return buildString {
             append(
@@ -85,6 +76,9 @@ $mermaid
 <div>
 ${renderTest(identifiedComponents)}
 </div>
+<div>
+${renderArchitectureFindings(architectureFindings)}
+</div>
 </body>
 </html>
             """.trimIndent()
@@ -92,15 +86,27 @@ ${renderTest(identifiedComponents)}
         }
     }
 
-    fun renderTest(identifiedComponents: Map<EasyAdlComponent, List<Entity>>) = createHTML().div {
+    private fun renderTest(identifiedComponents: Map<EasyAdlComponent, List<Entity>>) = createHTML().div {
         for (identified in identifiedComponents) {
             componentHeading(identified.key.name)
-            for(occurrence in identified.value) {
+            for (occurrence in identified.value) {
                 renderComponents(occurrence)
             }
         }
     }
 
+    private fun renderArchitectureFindings(architectureFindings: List<ArchitectureError>) =
+        createHTML().div {
+            architectureFindings.forEach {
+                renderArchitectureFinding(it)
+            }
+        }
+
+}
+
+private fun FlowContent.renderArchitectureFinding(architectureError: ArchitectureError) {
+    h3 { text(architectureError.entity.signature) }
+    p { text(architectureError.message) }
 }
 
 private fun FlowContent.renderComponents(entity: Entity) {

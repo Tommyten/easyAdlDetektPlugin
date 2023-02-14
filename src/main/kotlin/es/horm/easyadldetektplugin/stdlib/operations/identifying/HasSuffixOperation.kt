@@ -1,4 +1,4 @@
-package es.horm.easyadldetektplugin.operations.identifying
+package es.horm.easyadldetektplugin.stdlib.operations.identifying
 
 import es.horm.easyadldetektplugin.model.ExecutionScope
 import es.horm.easyadldetektplugin.model.IdentifyingEasyAdlOperation
@@ -8,6 +8,7 @@ import org.jetbrains.kotlin.psi.KtElement
 import org.jetbrains.kotlin.psi.KtNamed
 import org.jetbrains.kotlin.psi.KtSimpleNameExpression
 import org.jetbrains.kotlin.resolve.calls.util.getResolvedCall
+import org.jetbrains.kotlin.types.typeUtil.isUnit
 
 class HasSuffixOperation(private val suffix: StringArgument) : IdentifyingEasyAdlOperation {
 
@@ -25,12 +26,18 @@ class HasSuffixOperation(private val suffix: StringArgument) : IdentifyingEasyAd
 
     override fun identifyReference(ktElement: KtElement, executionScope: ExecutionScope): Boolean? =
         if (ktElement is KtSimpleNameExpression) {
-            ktElement.getResolvedCall(executionScope.bindingContext)
+            val returnType = ktElement.getResolvedCall(executionScope.bindingContext)
                 ?.resultingDescriptor
                 ?.returnType
-                ?.fqNameOrNull()
-                ?.toString()
-                ?.endsWith(suffix.value)
-                ?: false
+            // FIXME: this is not really what is supposed to be going on.
+            // We need to figure out whether the type of the current component is specified and if so check accordingly
+            if(returnType?.isUnit() == true) {
+                ktElement.getReferencedName().endsWith(suffix.value)
+            } else {
+                returnType?.fqNameOrNull()
+                    ?.toString()
+                    ?.endsWith(suffix.value)
+                    ?: false
+            }
         } else false
 }

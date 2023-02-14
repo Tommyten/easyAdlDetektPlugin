@@ -8,6 +8,7 @@ interface IdentifyingEasyAdlOperation : EasyAdlOperation {
     fun identifyReference(ktElement: KtElement, executionScope: ExecutionScope): Boolean? = null // TODO: update this in thesis as well
 }
 interface RuleEasyAdlOperation : EasyAdlOperation {
+    val errorMessage: String
     fun complies(ktElement: KtElement, executionScope: ExecutionScope): Boolean
 }
 

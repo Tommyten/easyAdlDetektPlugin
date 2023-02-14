@@ -73,7 +73,9 @@ class OperationVisitor : EasyAdlBaseVisitor<EasyAdlOperation>() {
                 .mapNotNull { it.component()?.ID()?.text }
                 .map { ComponentArgument(it) }
         )
-        val operator = ctx.operator().ID().joinToString(" ") { it.text }
+        //val operator = ctx.operator().joinToString { it.text }
+        val operator = ctx.operator().joinToString(separator = " [ARG] ") { it.ID().joinToString(separator = " ") { it.text } }
+        //val operator = ctx.operator().ID().joinToString(" ") { it.text }
 
         val suitableFactory = try {
             loadedOperatorFactories.single { it.canCreateOperation(operator) }

@@ -7,13 +7,19 @@ data class EasyAdlComponent(
     val easyAdlOperations: List<EasyAdlOperation>
 ) : ArchitectureFragment {
 
-    fun canComponentBeIdentified(element: KtElement, executionScope: ExecutionScope): Boolean =
+    fun canComponentBeIdentified(ktElement: KtElement, executionScope: ExecutionScope): Boolean =
         easyAdlOperations
             .filterIsInstance<IdentifyingEasyAdlOperation>()
-            .all { it.identify(element, executionScope) }
+            .all { it.identify(ktElement, executionScope) }
 
-    fun doesComponentComply(element: KtElement, executionScope: ExecutionScope): Boolean =
+    fun doesComponentComply(ktElement: KtElement, executionScope: ExecutionScope): Boolean =
         easyAdlOperations
             .filterIsInstance<RuleEasyAdlOperation>()
-            .all { it.complies(element, executionScope) }
+            .all { it.complies(ktElement, executionScope) }
+
+    fun getErrorMessages(ktElement: KtElement, executionScope: ExecutionScope) : List<String> =
+        easyAdlOperations
+            .filterIsInstance<RuleEasyAdlOperation>()
+            .filter { !it.complies(ktElement, executionScope) }
+            .map { it.errorMessage }
 }

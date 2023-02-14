@@ -1,7 +1,6 @@
-package es.horm.easyadldetektplugin.processor
+package es.horm.easyadldetektplugin.detekt.processor
 
-import es.horm.easyadldetektplugin.config.EasyAdlArchitectureHolder
-import es.horm.easyadldetektplugin.config.EasyAdlArchitectureReader
+import es.horm.easyadldetektplugin.detekt.config.EasyAdlArchitectureHolder
 import es.horm.easyadldetektplugin.interpreter.interpretArchitectureDescription
 import es.horm.easyadldetektplugin.model.ArchitectureDescription
 import es.horm.easyadldetektplugin.model.EasyAdlComponent
@@ -13,6 +12,7 @@ import io.gitlab.arturbosch.detekt.api.FileProcessListener
 import org.jetbrains.kotlin.com.intellij.openapi.util.Key
 import org.jetbrains.kotlin.psi.KtElement
 import org.jetbrains.kotlin.psi.KtFile
+import org.jetbrains.kotlin.psi.KtNamedDeclaration
 import org.jetbrains.kotlin.resolve.BindingContext
 
 class ArchComponentProcessor : FileProcessListener {
@@ -53,19 +53,18 @@ class ArchComponentProcessor : FileProcessListener {
 
         internal val identifiedComponentsMap = mutableMapOf<EasyAdlComponent, MutableList<Entity>>()
 
-        override fun visitKtElement(element: KtElement) {
-
+        override fun visitKtElement(ktElement: KtElement) {
             val executionScope = ExecutionScope(bindingContext, architectureDescription)
             val easyAdlComponents = architectureDescription.getAllComponents()
 
             easyAdlComponents.forEach { component ->
-                if (component.canComponentBeIdentified(element, executionScope)) {
-                    identifiedComponentsMap.getOrPut(component) { mutableListOf() }.add(Entity.from(element))
+                if (component.canComponentBeIdentified(ktElement, executionScope)) {
+                    val entity = if(ktElement is KtNamedDeclaration) Entity.atName(ktElement) else Entity.from(ktElement)
+                    identifiedComponentsMap.getOrPut(component) { mutableListOf() }.add(entity)
                 }
             }
 
-            super.visitKtElement(element)
-
+            super.visitKtElement(ktElement)
         }
     }
 }

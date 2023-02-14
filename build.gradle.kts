@@ -28,6 +28,11 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter:5.9.1")
 }
 
+tasks.withType<JavaCompile>() {
+    targetCompatibility = "11"
+    sourceCompatibility = "11"
+}
+
 tasks.withType<KotlinCompile>() {
     kotlinOptions.jvmTarget = "11"
 }

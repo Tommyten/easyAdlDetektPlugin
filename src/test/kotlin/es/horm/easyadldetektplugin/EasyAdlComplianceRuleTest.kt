@@ -1,5 +1,6 @@
 package es.horm.easyadldetektplugin
 
+import es.horm.easyadldetektplugin.detekt.rule.EasyAdlComplianceRule
 import es.horm.easyadldetektplugin.interpreter.interpretArchitectureDescription
 import io.gitlab.arturbosch.detekt.api.Config
 import io.gitlab.arturbosch.detekt.rules.KotlinCoreEnvironmentTest
@@ -191,8 +192,13 @@ class B {
     // region newtest
 
     @Test
-    fun `may not reference test`(){
+    fun `may not reference test`() {
         val architectureDescriptionText = """
+component Test:
+    is Interface
+    must declare exactly "2" functions
+    must declare operator function "invoke"
+            
 system MVVM:
     component UI:
         has Suffix "View"
@@ -212,6 +218,14 @@ system MVVM:
 
         val code = """
 package org.example.mvvm
+
+fun caller() {
+    callee()
+}
+
+fun callee() {
+
+}
 
 class SampleView {
 
@@ -237,6 +251,43 @@ class SampleRepository {
 
     fun getData(): Int = (0..UPPER_BOUND).random()
 }
+        """
+        val rule = EasyAdlComplianceRule(Config.empty).apply {
+            architectureDescription = interpretArchitectureDescription(architectureDescriptionText)
+        }
+        val findings = rule.compileAndLintWithContext(env, code)
+        findings shouldHaveSize 0
+    }
+
+    // endregion
+    @Test
+    fun `asdf`() {
+        val architectureDescriptionText = """
+system UiLayer:
+    component Route:
+        has Suffix "Route"
+        is annotated with "Composable"
+        must reference component Screen
+
+    component Screen:
+        has Suffix "Screen"
+        is annotated with "Composable"
+        """.trimIndent()
+
+        val code = """
+package org.example.mvvm
+
+@Composable
+fun callerRoute() {
+    calleeScreen()
+}
+
+@Composable
+fun calleeScreen() {
+
+}
+
+annotation class Composable
         """
         val rule = EasyAdlComplianceRule(Config.empty).apply {
             architectureDescription = interpretArchitectureDescription(architectureDescriptionText)

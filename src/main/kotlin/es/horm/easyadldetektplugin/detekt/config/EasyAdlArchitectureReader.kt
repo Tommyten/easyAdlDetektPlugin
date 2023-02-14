@@ -1,8 +1,8 @@
-package es.horm.easyadldetektplugin.config
+package es.horm.easyadldetektplugin.detekt.config
 
 import es.horm.easyadldetektplugin.ARCHITECTURE_DESCRIPTION_PATH_CONFIG_KEY
-import es.horm.easyadldetektplugin.EasyAdlComplianceRule
-import es.horm.easyadldetektplugin.EasyAdlRuleSetProvider
+import es.horm.easyadldetektplugin.detekt.rule.EasyAdlComplianceRule
+import es.horm.easyadldetektplugin.detekt.rule.EasyAdlRuleSetProvider
 import es.horm.easyadldetektplugin.interpreter.interpretArchitectureDescription
 import es.horm.easyadldetektplugin.model.ArchitectureDescription
 import io.gitlab.arturbosch.detekt.api.Config

@@ -1,4 +1,4 @@
-package es.horm.easyadldetektplugin.operations.rule
+package es.horm.easyadldetektplugin.stdlib.operations.rule
 
 import es.horm.easyadldetektplugin.mermaid.HasMermaidFlowChartRepresentation
 import es.horm.easyadldetektplugin.model.ComponentArgument
@@ -10,11 +10,15 @@ import org.jetbrains.kotlin.psi.KtElement
 import org.jetbrains.kotlin.psi.KtReferenceExpression
 import org.jetbrains.kotlin.psi.psiUtil.collectDescendantsOfType
 
-class MayNotReferenceOperation(private val componentArgument: ComponentArgument) : RuleEasyAdlOperation,
-    HasMermaidFlowChartRepresentation {
+class MustReferenceOperation(
+    private val componentArgument: ComponentArgument
+) : RuleEasyAdlOperation, HasMermaidFlowChartRepresentation {
+
+    override val errorMessage = "This component does not reference the component ${componentArgument.componentName}."
 
     companion object {
-        private val spellings = listOf("may not reference", "shall not reference", "must not reference")
+
+        private val spellings = listOf("must reference")
 
         fun matchesTokenText(tokenText: String): Boolean = spellings.any { it.equals(tokenText, true) }
     }
@@ -25,7 +29,7 @@ class MayNotReferenceOperation(private val componentArgument: ComponentArgument)
         val identificationOperationsOfReferenced =
             referencedComponent.easyAdlOperations.filterIsInstance<IdentifyingEasyAdlOperation>()
 
-        return referenceExpressions.none { refExpr ->
+        return referenceExpressions.any { refExpr ->
             identificationOperationsOfReferenced.all { idOp ->
                 idOp.identifyReference(refExpr, executionScope) ?: true
             }
@@ -33,5 +37,5 @@ class MayNotReferenceOperation(private val componentArgument: ComponentArgument)
     }
 
     override fun getMermaidFlowChartRepresentation(owningComponent: EasyAdlComponent): String =
-        "${owningComponent.name} --x ${componentArgument.componentName}"
+        "${owningComponent.name}==>${componentArgument.componentName}"
 }
