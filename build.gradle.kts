@@ -21,7 +21,7 @@ dependencies {
 
     implementation("org.jetbrains.kotlinx:kotlinx-html-jvm:0.8.0")
     implementation("com.yuvalshavit:antlr-denter:1.1")
-    antlr("org.antlr:antlr4:4.11.1")
+    antlr("org.antlr:antlr4:4.12.0")
 
     testImplementation("io.gitlab.arturbosch.detekt:detekt-test:1.22.0")
     testImplementation("io.kotest:kotest-assertions-core:5.5.4")
