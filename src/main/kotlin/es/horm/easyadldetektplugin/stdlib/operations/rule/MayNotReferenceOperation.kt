@@ -10,7 +10,7 @@ import org.jetbrains.kotlin.psi.KtElement
 import org.jetbrains.kotlin.psi.KtReferenceExpression
 import org.jetbrains.kotlin.psi.psiUtil.collectDescendantsOfType
 
-class MayNotReferenceOperation(private val componentArgument: ComponentArgument) : RuleEasyAdlOperation,
+class MayNotReferenceOperation(private val componentArgument: ComponentArgument, override val modifiers: List<String>) : RuleEasyAdlOperation,
     HasMermaidFlowChartRepresentation {
 
     companion object {
@@ -34,6 +34,8 @@ class MayNotReferenceOperation(private val componentArgument: ComponentArgument)
         }
     }
 
-    override fun getMermaidFlowChartRepresentation(owningComponent: EasyAdlComponent): String =
-        "${owningComponent.name} --x ${componentArgument.componentName}"
+    override fun getMermaidFlowChartRepresentation(owningComponent: EasyAdlComponent): String? =
+        if(modifiers.none{ it.equals("hidden", ignoreCase = true) }) {
+            "${owningComponent.name} --x ${componentArgument.componentName}"
+        } else null
 }

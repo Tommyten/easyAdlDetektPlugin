@@ -24,12 +24,13 @@ import com.yuvalshavit.antlr4.DenterHelper;
 architectureDescription: (systemDefinition | componentDefinition)+ EOF;
 systemDefinition: system ':' INDENT (componentDefinition NL?)+ DEDENT;
 componentDefinition : component ':' INDENT (operation NL)+ DEDENT;
-operation: operator (argument | operator)*;
+operation: operator (argument | operator)* modifiers?;
 
 operator: ID+;
 system : SYSTEM ID;
 component : COMPONENT ID;
 argument : ARGUMENT | component;
+modifiers: '(' ID+ (',' ID+)* ','? ')';
 
 COMMENT: '#' ~('\r'|'\n')* -> skip;
 SYSTEM : S Y S T E M;

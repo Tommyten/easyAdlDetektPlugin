@@ -15,7 +15,7 @@ class MustDeclareExactlyNFunctionsOperation(amountString: StringArgument) : Rule
 
     companion object {
 
-        private val spellings = listOf("must declare exactly [ARG] functions")
+        private val spellings = listOf("must declare exactly [ARG] functions", "must declare exactly [ARG] function")
 
         fun matchesTokenText(tokenText: String): Boolean = spellings.any { it.equals(tokenText, true) }
     }

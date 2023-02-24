@@ -108,6 +108,18 @@ public class EasyAdlBaseListener implements EasyAdlListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitArgument(EasyAdlParser.ArgumentContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterModifiers(EasyAdlParser.ModifiersContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitModifiers(EasyAdlParser.ModifiersContext ctx) { }
 
 	/**
 	 * {@inheritDoc}

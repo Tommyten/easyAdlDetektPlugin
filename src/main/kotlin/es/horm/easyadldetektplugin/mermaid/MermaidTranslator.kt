@@ -13,7 +13,9 @@ fun architectureDescriptionToMermaid(architectureDescription: ArchitectureDescri
 
     for(component in allComponents) {
         component.easyAdlOperations.filterIsInstance<HasMermaidFlowChartRepresentation>().forEach {
-            stringBuilder.appendLine(it.getMermaidFlowChartRepresentation(component))
+            it.getMermaidFlowChartRepresentation(component)?.let { mermaidRepresentation ->
+                stringBuilder.appendLine(mermaidRepresentation)
+            }
         }
     }
 
@@ -45,7 +47,7 @@ system MVVM:
     component View:
       has Suffix "View"
       must reference component ViewModel
-      may not reference component DataSource
+      may not reference component DataSource (hidden)
     """.trimIndent()
     val architectureDescription = interpretArchitectureDescription(architectureDescriptionText)
     println(architectureDescriptionToMermaid(architectureDescription))

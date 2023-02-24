@@ -14,7 +14,7 @@ class MustDeclarePublicMethodOperation(private val methodName: StringArgument) :
 
     companion object {
 
-        private val spellings = listOf("must declare public method")
+        private val spellings = listOf("must declare public method", "must declare public function", "must declare public fun")
 
         fun matchesTokenText(tokenText: String): Boolean = spellings.any { it.equals(tokenText, true) }
     }

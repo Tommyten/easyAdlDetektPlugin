@@ -58,4 +58,10 @@ public interface EasyAdlVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitArgument(EasyAdlParser.ArgumentContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link EasyAdlParser#modifiers}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitModifiers(EasyAdlParser.ModifiersContext ctx);
 }

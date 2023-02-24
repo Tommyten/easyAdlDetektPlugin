@@ -33,7 +33,6 @@ class IsAnnotatedWithOperation(private val stringArgument: StringArgument) : Ide
             } ?: false
         } else false
 
-    //TODO: diese mermaid representation ist wahrscheinlich nicht sehr sinnvoll, vielleicht als anschauungsbeispiel verwenden?
     override fun getMermaidFlowChartRepresentation(owningComponent: EasyAdlComponent): String =
         "${owningComponent.name} -.- ${stringArgument.value}(\"@${stringArgument.value}\")"
 }

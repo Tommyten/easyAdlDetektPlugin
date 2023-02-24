@@ -87,4 +87,14 @@ public interface EasyAdlListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitArgument(EasyAdlParser.ArgumentContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link EasyAdlParser#modifiers}.
+	 * @param ctx the parse tree
+	 */
+	void enterModifiers(EasyAdlParser.ModifiersContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link EasyAdlParser#modifiers}.
+	 * @param ctx the parse tree
+	 */
+	void exitModifiers(EasyAdlParser.ModifiersContext ctx);
 }

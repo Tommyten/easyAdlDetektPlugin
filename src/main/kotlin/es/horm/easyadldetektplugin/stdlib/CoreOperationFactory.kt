@@ -10,18 +10,20 @@ import es.horm.easyadldetektplugin.stdlib.operations.identifying.IsAnnotatedWith
 import es.horm.easyadldetektplugin.stdlib.operations.identifying.IsClassOperation
 import es.horm.easyadldetektplugin.stdlib.operations.identifying.IsInterfaceOperation
 import es.horm.easyadldetektplugin.stdlib.operations.identifying.IsInterfaceOrClassOperation
+import es.horm.easyadldetektplugin.stdlib.operations.identifying.IsInternalOperation
 import es.horm.easyadldetektplugin.stdlib.operations.identifying.IsNotInnerClassOperation
 import es.horm.easyadldetektplugin.stdlib.operations.identifying.MatchesRegexOperation
 import es.horm.easyadldetektplugin.stdlib.operations.rule.MustDeclarePublicMethodOperation
 import es.horm.easyadldetektplugin.stdlib.operations.rule.MayNotReferenceOperation
 import es.horm.easyadldetektplugin.stdlib.operations.rule.MayReferenceOperation
+import es.horm.easyadldetektplugin.stdlib.operations.rule.MustBeInternalOperation
 import es.horm.easyadldetektplugin.stdlib.operations.rule.MustDeclareExactlyNFunctionsOperation
 import es.horm.easyadldetektplugin.stdlib.operations.rule.MustDeclareOperatorFunctionOperation
 import es.horm.easyadldetektplugin.stdlib.operations.rule.MustHaveInnerClassOperation
 import es.horm.easyadldetektplugin.stdlib.operations.rule.MustReferenceOperation
 
 class CoreOperationFactory : OperationFactory {
-    override fun createOperation(tokenText: String, arguments: List<Argument>): EasyAdlOperation {
+    override fun createOperation(tokenText: String, arguments: List<Argument>, modifiers: List<String>): EasyAdlOperation {
         if (HasSuffixOperation.matchesTokenText(tokenText)) {
             require(arguments.all { it is StringArgument }) { "$tokenText requires a single String argument" }
             require(arguments.size == 1) { "$tokenText requires a single String argument" }
@@ -54,7 +56,7 @@ class CoreOperationFactory : OperationFactory {
             return MustReferenceOperation(arguments.single() as ComponentArgument)
         } else if (MayNotReferenceOperation.matchesTokenText(tokenText)) {
             require(arguments.single() is ComponentArgument)
-            return MayNotReferenceOperation(arguments.single() as ComponentArgument)
+            return MayNotReferenceOperation(arguments.single() as ComponentArgument, modifiers)
         } else if (MustDeclarePublicMethodOperation.matchesTokenText(tokenText)) {
             require(arguments.single() is StringArgument)
             return MustDeclarePublicMethodOperation(arguments.single() as StringArgument)
@@ -67,6 +69,12 @@ class CoreOperationFactory : OperationFactory {
         } else if (MayReferenceOperation.matchesTokenText(tokenText)) {
             require(arguments.single() is ComponentArgument)
             return MayReferenceOperation(arguments.single() as ComponentArgument)
+        } else if (MustBeInternalOperation.matchesTokenText(tokenText)) {
+            require(arguments.isEmpty()) { "$tokenText does not allow arguments" }
+            return MustBeInternalOperation()
+        } else if (IsInternalOperation.matchesTokenText(tokenText)) {
+            require(arguments.isEmpty()) { "$tokenText does not allow arguments" }
+            return IsInternalOperation()
         }
         throw IllegalStateException()
     }
@@ -85,5 +93,7 @@ class CoreOperationFactory : OperationFactory {
                 MustDeclareExactlyNFunctionsOperation.matchesTokenText(tokenText) ||
                 MustDeclareOperatorFunctionOperation.matchesTokenText(tokenText) ||
                 MayReferenceOperation.matchesTokenText(tokenText) ||
-                IsInterfaceOrClassOperation.matchesTokenText(tokenText)
+                IsInterfaceOrClassOperation.matchesTokenText(tokenText) ||
+                IsInternalOperation.matchesTokenText(tokenText) ||
+                MustBeInternalOperation.matchesTokenText(tokenText)
 }

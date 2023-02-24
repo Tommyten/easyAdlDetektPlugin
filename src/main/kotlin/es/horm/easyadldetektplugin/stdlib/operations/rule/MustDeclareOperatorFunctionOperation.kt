@@ -14,7 +14,7 @@ class MustDeclareOperatorFunctionOperation(private val funName: StringArgument) 
 
     companion object {
 
-        private val spellings = listOf("must declare operator function")
+        private val spellings = listOf("must declare operator function", "must declare operator fun", "must declare operator method")
 
         fun matchesTokenText(tokenText: String): Boolean = spellings.any { it.equals(tokenText, true) }
     }

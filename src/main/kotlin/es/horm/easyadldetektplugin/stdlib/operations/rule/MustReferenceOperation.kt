@@ -8,6 +8,7 @@ import es.horm.easyadldetektplugin.model.IdentifyingEasyAdlOperation
 import es.horm.easyadldetektplugin.model.RuleEasyAdlOperation
 import org.jetbrains.kotlin.psi.KtElement
 import org.jetbrains.kotlin.psi.KtReferenceExpression
+import org.jetbrains.kotlin.psi.KtTypeReference
 import org.jetbrains.kotlin.psi.psiUtil.collectDescendantsOfType
 
 class MustReferenceOperation(
@@ -26,16 +27,19 @@ class MustReferenceOperation(
     override fun complies(ktElement: KtElement, executionScope: ExecutionScope): Boolean {
         val referencedComponent = executionScope.getComponentByName(componentArgument.componentName) ?: return false
         val referenceExpressions = ktElement.collectDescendantsOfType<KtReferenceExpression>()
+        val typeReferences = ktElement.collectDescendantsOfType<KtTypeReference>()
         val identificationOperationsOfReferenced =
             referencedComponent.easyAdlOperations.filterIsInstance<IdentifyingEasyAdlOperation>()
 
-        return referenceExpressions.any { refExpr ->
-            identificationOperationsOfReferenced.all { idOp ->
-                idOp.identifyReference(refExpr, executionScope) ?: true
+        val allReferences = referenceExpressions + typeReferences
+
+        return identificationOperationsOfReferenced.all { idOp ->
+            allReferences.any { ref ->
+                idOp.identifyReference(ref, executionScope) ?: true
             }
         }
     }
 
-    override fun getMermaidFlowChartRepresentation(owningComponent: EasyAdlComponent): String =
+    override fun getMermaidFlowChartRepresentation(owningComponent: EasyAdlComponent): String? =
         "${owningComponent.name}==>${componentArgument.componentName}"
 }
