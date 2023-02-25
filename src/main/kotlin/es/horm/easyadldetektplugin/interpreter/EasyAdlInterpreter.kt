@@ -114,20 +114,22 @@ class SystemVisitor : EasyAdlBaseVisitor<EasyAdlSystem>() {
 class ComponentVisitor : EasyAdlBaseVisitor<EasyAdlComponent>() {
     override fun visitComponentDefinition(ctx: ComponentDefinitionContext): EasyAdlComponent {
         val componentIdentifier = ctx.component().ID().text
-        val operators = ctx.operation().map { it.accept(OperationVisitor()) }
-        return EasyAdlComponent(componentIdentifier, operators)
+        val operations = ctx.operation().map { it.accept(OperationVisitor()) }
+        return EasyAdlComponent(componentIdentifier, operations)
     }
 }
 
 class OperationVisitor : EasyAdlBaseVisitor<EasyAdlOperation>() {
 
-    private val loadedOperatorFactories = ServiceLoader.load(OperationFactory::class.java, OperationFactory::class.java.classLoader)
+    private val loadedOperationFactories = ServiceLoader.load(OperationFactory::class.java, OperationFactory::class.java.classLoader)
 
     override fun visitOperation(ctx: OperationContext): EasyAdlOperation {
-        val operator = ctx.operator().joinToString(separator = " [ARG] ") { it.ID().joinToString(separator = " ") { it.text } }
+        val operator = ctx.operator().joinToString(separator = " [ARG] ") { operator ->
+            operator.ID().joinToString(separator = " ") { it.text }
+        }
 
         val suitableFactory = try {
-            loadedOperatorFactories.single { it.canCreateOperation(operator) }
+            loadedOperationFactories.single { it.canCreateOperation(operator) }
         } catch (noElement: NoSuchElementException) {
             error("No Operator Factory was loaded which provides a definition for operator \"$operator\"")
         } catch (tooMany: IllegalArgumentException) {
@@ -157,5 +159,3 @@ class OperationVisitor : EasyAdlBaseVisitor<EasyAdlOperation>() {
         return operation
     }
 }
-
-

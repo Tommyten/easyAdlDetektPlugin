@@ -37,7 +37,7 @@ component DataSource:
 system MVVM:
     component Model:
       has suffix "Model"
-      must reference component DataSource
+      may reference component DataSource
       
     component ViewModel:
       has suffix "ViewModel"

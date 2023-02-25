@@ -17,5 +17,6 @@ class IsNotInnerClassOperation : IdentifyingEasyAdlOperation {
     override fun identify(ktElement: KtElement, executionScope: ExecutionScope): Boolean =
         ktElement is KtClass && !ktElement.isInner()
 
-    // override fun identifyReference(ktElement: KtElement, executionScope: ExecutionScope): Boolean = true TODO: check, i think this may be possible
+    // override fun identifyReference(ktElement: KtElement, executionScope: ExecutionScope): Boolean = true
+    // TODO: check, i think this may be possible
 }

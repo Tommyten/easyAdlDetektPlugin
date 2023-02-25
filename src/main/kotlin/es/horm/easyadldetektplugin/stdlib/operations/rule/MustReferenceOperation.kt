@@ -26,12 +26,13 @@ class MustReferenceOperation(
 
     override fun complies(ktElement: KtElement, executionScope: ExecutionScope): Boolean {
         val referencedComponent = executionScope.getComponentByName(componentArgument.componentName) ?: return false
+
         val referenceExpressions = ktElement.collectDescendantsOfType<KtReferenceExpression>()
         val typeReferences = ktElement.collectDescendantsOfType<KtTypeReference>()
+        val allReferences = referenceExpressions + typeReferences
+
         val identificationOperationsOfReferenced =
             referencedComponent.easyAdlOperations.filterIsInstance<IdentifyingEasyAdlOperation>()
-
-        val allReferences = referenceExpressions + typeReferences
 
         return identificationOperationsOfReferenced.all { idOp ->
             allReferences.any { ref ->
@@ -40,6 +41,6 @@ class MustReferenceOperation(
         }
     }
 
-    override fun getMermaidFlowChartRepresentation(owningComponent: EasyAdlComponent): String? =
+    override fun getMermaidFlowChartRepresentation(owningComponent: EasyAdlComponent): String =
         "${owningComponent.name}==>${componentArgument.componentName}"
 }

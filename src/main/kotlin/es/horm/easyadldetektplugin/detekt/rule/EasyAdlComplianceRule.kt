@@ -26,21 +26,26 @@ class EasyAdlComplianceRule(
         Debt.TWENTY_MINS,
     )
 
-    var architectureDescription: ArchitectureDescription = EasyAdlArchitectureHolder.architectureDescription ?: ArchitectureDescription(listOf())
+    var architectureDescription: ArchitectureDescription =
+        EasyAdlArchitectureHolder.architectureDescription ?: ArchitectureDescription(listOf())
 
     override fun visitKtElement(ktElement: KtElement) {
         val executionScope = ExecutionScope(bindingContext, architectureDescription)
 
         val easyAdlComponents = architectureDescription.getAllComponents()
-        val identified = easyAdlComponents.filter { it.canComponentBeIdentified(ktElement, executionScope) }
+        val identified = easyAdlComponents.filter {
+            it.canComponentBeIdentified(ktElement, executionScope)
+        }
         for (component in identified) {
-            println("Identified a component!")
             val doesComply = component.doesComponentComply(ktElement, executionScope)
             if (!doesComply) {
-                println("The component does not comply!")
-                val entity = if(ktElement is KtNamedDeclaration) Entity.atName(ktElement) else Entity.from(ktElement)
-                 component.getErrorMessages(ktElement, executionScope)
-                     .forEach { report(ArchitectureError(component.name, issue, entity, it)) }
+                val entity = if (ktElement is KtNamedDeclaration) {
+                    Entity.atName(ktElement)
+                } else {
+                    Entity.from(ktElement)
+                }
+                component.getErrorMessages(ktElement, executionScope)
+                    .forEach { report(ArchitectureError(component.name, issue, entity, it)) }
             }
         }
 
