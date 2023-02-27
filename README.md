@@ -1,28 +1,84 @@
-# Detekt custom rule template
+# EasyADL
 
-This repository is a template. You can use it to generate your own repository to write and share your custom rules.
+This project is the home of the EasyADL architecture description language, the EasyADL Detekt plugin
+and the EasyADL Gradle plugin.
 
-## How to use it
+When the EasyADL Detekt plugin is properly applied to the project you want to analyze with it,
+simply execute the `detektMain` task and the EasyADL Detekt plugin will be run automatically,
+generating the architecture report to the path given in its configuration.
 
-1. Create a new repository using this one as a template. [Click here][create_template]
-2. Edit MyRule to fit your use case
-3. Share your rule! You can upload your rule to [Maven Central][maven_central] if you want. If you don't want to do all
-   the steps that Maven Central requires you can just share your rule using [jitpack][jitpack].
-4. Extra: you can remove all this README and explain what your rule does and how to configure it.
+## Setup
 
-## Documentation
+To make the EasyADL Detekt and Gradle plugins available for other projects to use, execute the
+`publishToMavenLocal` command. This builds and packages the project, and publishes it to the local
+Maven repository. To use one of the plugins in your own projects, add the `mavenLocal` repository
+to your `settings.gradle` file in the `repositories` section of the `pluginManagement` block.
+You also need to add the `mavenLocal` repository to the `build.gradle` in which you want to add
+the EasyADL Detekt and Gradle plugins.
 
-You can find the documentation about how to write custom [rules here][custom_rule_documentation].
+Both the Gradle and Detekt plugin also need some further configuration. The necessary configuration
+is shown in the following example.
 
-## Note
+Example of applying the EasyADL Detekt and Gradle plugins using Kotlin script build and settings Gradle
+files:
 
-Remember that, by default, all rules are disabled. To configure your rules edit the file in
-`src/main/resources/config/config.yml`.
+settings.gradle.kts
+```
+pluginManagement {
+    repositories {
+        mavenCentral()
+        mavenLocal()
+    }
+}
+```
 
-[create_template]: https://github.com/detekt/detekt-custom-rule-template/generate
+build.gradle.kts
+```
+plugins {
+    ...
+    id("io.gitlab.arturbosch.detekt") version "1.22.0"
+    id("es.horm.easyadldetektplugin.gradleplugin") version "0.0.1"
+}
 
-[maven_central]: https://search.maven.org/
+repositories {
+    mavenCentral()
+    mavenLocal()
+}
 
-[custom_rule_documentation]: https://detekt.github.io/detekt/extensions.html
+dependencies {
+    ...
+    detektPlugins("es.horm.easyadldetektplugin:easyAdlDetektPlugin:0.0.1")
+}
 
-[jitpack]: https://jitpack.io/
+easyAdl {
+    // necessary so that the EasyADL Gradle plugin knows where the architecture description is
+    archDescriptionPath = "pathToArchDescription\archDescription.eadl"
+}
+
+// This is needed so that Detekt properly generates the architecture report
+tasks {
+    withType<io.gitlab.arturbosch.detekt.Detekt> {
+        reports {
+            custom {
+                reportId = "ArchReport"
+                // This tells detekt, where it should write the report to,
+                // you have to specify this file in the gitlab pipeline config.
+                outputLocation.set(file("$buildDir/reports/easyAdl/archReport.html"))
+            }
+        }
+    }
+}
+```
+
+The `detekt.yml` file also needs some further configuration, so that the EasyADL Detekt plugin knows
+where to find the architecture description file:
+
+detekt.yml
+```
+...
+
+EasyAdlRuleSet:
+  EasyAdlComplianceRule:
+    architectureDescriptionPath: 'pathToArchDescription\archDescription.eadl'
+    active: true
+```
