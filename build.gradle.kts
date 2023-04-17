@@ -24,7 +24,7 @@ dependencies {
     antlr("org.antlr:antlr4:4.11.1")
 
     testImplementation("io.gitlab.arturbosch.detekt:detekt-test:1.22.0")
-    testImplementation("io.kotest:kotest-assertions-core:5.5.4")
+    testImplementation("io.kotest:kotest-assertions-core:5.6.0")
     testImplementation("org.junit.jupiter:junit-jupiter:5.9.1")
 }
 
